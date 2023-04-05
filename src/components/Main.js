@@ -10,7 +10,7 @@ function Main() {
             <ul>
                 <li><a href="http://localhost:3000/singlePlayer"> Single Player</a></li>
                 <li><a href="http://localhost:3000/Board"> Player VS Player</a></li>
-                <li><a href="http://localhost:3000/singlePlayer"> Online</a></li>
+                <li><a href="http://localhost:3000/login"> Online</a></li>
             </ul>
         </div>
     )

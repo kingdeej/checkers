@@ -6,17 +6,15 @@ import checkerPieceKing1 from '../Images/checker-piece-king-1.svg'
 import checkerPieceKing2 from '../Images/checker-piece-king-2.svg'
 import {useCollection, useCollectionData} from 'react-firebase-hooks/firestore'
 import {collection, addDoc, updateDoc, doc, deleteDoc} from 'firebase/firestore'
-import {db, auth} from '../config/firebase'
-import { Navigate, redirect } from 'react-router-dom';
+import {db} from '../config/firebase'
 
 
 
-function Board(props) {
+function Board() {
   const [playerId, setPlayerId] = useState(1)
   const [playerClick, setPlayerClick] = useState("")
   const [king, setKing] = useState([])
-  const [uid, setUid] = useState()
-  const [logout, setLogout] = useState(false)
+ 
   const [player1, setPlayer1] = useState(['00','02','04','06','11','13','15','17','20','22','24','26',])
   const [player2, setPlayer2] = useState(['71','73','75','77','60','62','64','66','51','53','55','57',])
 
@@ -25,73 +23,41 @@ function Board(props) {
   const [data] = useCollectionData(checkerCollection, {idField: 'id'})
   const id = dataId?.docs.map(x=>x.id)[0]
 
+
   setTimeout(() => {
     data?.map(x=> setPlayerId(x.playerId))
-    data?.map(x=> setUid(x.uid))
-    data?.map(x=> setKing(x.king))
-    data?.map(x=> setPlayer1(x.player1))
-    data?.map(x=> setPlayer2(x.player2))
-    data?.map((x)=>{
-      if (!x.enemyLocation.length) {
-      }else{
-        if (x.playerId === 1) {
-          setPlayer1(x.enemyLocation)
-        }else{
-          setPlayer2(x.enemyLocation)
-        }
-    }
-    })
   }, 5);
-  const deleteDocument = async () => {
-    await deleteDoc(doc(db, 'checkers', id))     
-  }
 
-  function signOut() {
-    auth.signOut()
+  const test = async () => {
+    await deleteDoc(doc(db, 'checkers', id), {
+      playerId: playerId,
+      player1: player1,
+      player2: player2,
+      playerClick: playerClick,
+      king: king,
+    })     
   }
-  
-  
-  if (auth?.currentUser?.uid === undefined) {
-    if (id !== undefined) {
-      deleteDocument()
-      localStorage.setItem('logout', 'true')
-    }
-
-  }
-
-  if (localStorage.getItem('logout') === 'true') {
-    return <Navigate to="/login" />
-  }
-  
   // delete document
-  window.onbeforeunload = (e) => {
-    signOut()
-  }
-
+  window.addEventListener("beforeunload", () => {
+    test()
+  });
   
-  
-  const sendCheckers = async (enemyLocation)=>{
-    // add document
+  const sendCheckers = async ()=>{
     if (data.length === 0) {
       await addDoc(checkerCollection, {
-        uid: auth?.currentUser?.uid,
-        playerId: playerId === 1? 2:1,
+        playerId: playerId,
         player1: player1,
         player2: player2,
         playerClick: playerClick,
         king: king,
-        enemyLocation: enemyLocation
       })
     }else{
-      // update document
       await updateDoc(doc(db, 'checkers', id), {
-        uid: auth?.currentUser?.uid,
-        playerId: playerId === 1? 2:1,
+        playerId: playerId,
         player1: player1,
         player2: player2,
         playerClick: playerClick,
         king: king,
-        enemyLocation: enemyLocation
       })      
     }
 
@@ -123,7 +89,6 @@ function Board(props) {
     let allow = true
     const player1King = ['71', '73', '75', '77']
     const player2King = ['00', '02', '04', '06']
-    let enlocation = ''
 
 
     // set previous player position
@@ -142,7 +107,6 @@ function Board(props) {
       function movePiece(player, enemyPlayer) {
         if (enemyPlayer.includes(currentPlay) || player.includes(currentPlay)) {
         }else{
-
           // when move set replace king with currentPlay
           if (enemyPlayer.length === 0) {
             alert('gameover')
@@ -158,19 +122,16 @@ function Board(props) {
             player[index] = currentPlay
           }
           setPlayerId(ev === 1 ? 2: 1)
-          sendCheckers(enlocation)
-                      
+          sendCheckers()
         }
       }
       function deletePiece(player, enemyPlayer, enemyLocation , setplayer) {
         if (enemyPlayer.includes(currentPlay) || player.includes(currentPlay)) {
         }else{
           if (enemyPlayer.includes(enemyLocation) ) {
-            const getLocation = enemyPlayer.filter((x)=> x !== enemyLocation)
-            setplayer(getLocation);    
-            enlocation = getLocation
             movePiece(player, enemyPlayer)      
-
+            const getLocation = enemyPlayer.filter((x)=> x !== enemyLocation)
+            setplayer(getLocation);       
           }
         }
       }
@@ -260,7 +221,7 @@ function Board(props) {
         }
       }
 
-      if (auth?.currentUser?.uid !== uid) {
+
       if (ev === 1) {
         //detect if player 1 can becomes a king 
         if (player1King.includes(currentPlay)) {
@@ -384,7 +345,7 @@ function Board(props) {
         }
       }
     }
-  }
+
     // get next play position
     if (player1.includes(playerClick) && playerId === 1) {
       move(1)
@@ -420,7 +381,7 @@ function Board(props) {
                     <div 
                       key={rowKey}
                       onClick={(e)=>{onSelect(idSrt)}}
-                      onDrop={(e)=>{onSelect(idSrt)}}
+                      onDrop={(e)=>{onSelect(id Srt)}}
                       onDragOver={allowDrop}
                       id={idSrt}
                       className='square' 
